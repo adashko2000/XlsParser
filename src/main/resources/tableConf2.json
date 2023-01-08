@@ -1,0 +1,55 @@
+{
+  "filePath": "C:\\wlasne\\map_conf.xls",
+  "tableName": "MAP_CONF",
+  "outputFile": "mapConfSi",
+  "rowIgnoringValues": [
+    "n/d"
+  ],
+  "columns": [
+    {
+      "colName": "TYPE",
+      "fileColName": "TYPE",
+      "type": "string"
+    },
+    {
+      "colName": "VERSION",
+      "fileColName": "VERSION",
+      "type": "string"
+    },
+    {
+      "colName": "EXCLUDED_BY",
+      "fileColName": "EXCLUDED_BY",
+      "type": "string"
+    },
+    {
+      "colName": "CODE",
+      "fileColName": "CODE",
+      "type": "string"
+    },
+    {
+      "colName": "NAME",
+      "fileColName": "NAME",
+      "type": "string"
+    },
+    {
+      "colName": "DESCRIPTION",
+      "fileColName": "DESCRIPTION",
+      "type": "string"
+    },
+    {
+      "colName": "PORTAL_NAME",
+      "fileColName": "PORTAL_NAME (SI)",
+      "type": "string"
+    },
+    {
+      "colName": "PORTAL_DESC",
+      "fileColName": "PORTAL_DESC (SI)",
+      "type": "string"
+    },
+    {
+      "colName": "PORTAL_TOOLTIP",
+      "fileColName": "PORTAL_TOOLTIP (SI)",
+      "type": "string"
+    }
+  ]
+}

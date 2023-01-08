@@ -1,0 +1,40 @@
+{
+  "filePath": "C:\\wlasne\\test2.xls",
+  "tableName": "MAP_CONF",
+  "outputFile": "mapConf",
+  "rowIgnoringValues": [
+    "n/d"
+  ],
+  "columns": [
+    {
+      "colName": "name",
+      "fileColName": "Nazwa",
+      "type": "string"
+    },
+    {
+      "colName": "version",
+      "fileColName": "Wersja",
+      "type": "string"
+    },
+    {
+      "colName": "test",
+      "fileColName": "Test",
+      "type": "string"
+    },
+    {
+      "colName": "portal_name",
+      "fileColName": "Portal name (SI)",
+      "type": "number"
+    },
+    {
+      "colName": "portal_opl",
+      "fileColName": "Portal opl",
+      "type": "string"
+    },
+    {
+      "colName": "dddud",
+      "fileColName": "DUDU",
+      "type": "string"
+    }
+  ]
+}
