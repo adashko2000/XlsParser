@@ -3,13 +3,20 @@
   "tableName": "MAP_CONF",
   "outputFile": "mapConfSi",
   "rowIgnoringValues": [
-    "n/d"
+    "n/d",
+    "nd",
+    "nie dotyczy na chwile obecną",
+    "nie dotyczy"
+  ],
+  "rowIgnoringHeaders": [
+    "PORTAL_NAME (OPL)"
   ],
   "columns": [
     {
       "colName": "TYPE",
       "fileColName": "TYPE",
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     {
       "colName": "VERSION",

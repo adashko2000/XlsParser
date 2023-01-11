@@ -12,6 +12,7 @@ import org.insert.parser.sheets.TemplateSheet;
 import java.io.FileInputStream;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class XlsParser {
@@ -21,6 +22,8 @@ public class XlsParser {
     private final static String DELIMITER = ";";
 
     private final static String DEFAULT_VALUE = "null";
+
+    private final static String ID = "ID";
 
     public String convertToInsert(final TemplateSheet templateSheet) throws Exception {
         final FileInputStream file = new FileInputStream(templateSheet.filePath);
@@ -33,8 +36,10 @@ public class XlsParser {
         final List<SheetColumn> sheetColumns = templateSheet.columns;
         final List<String> inserList = new ArrayList<>();
 
+        long tableSequence = 1;
+
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-            if (this.containsIgnored(sheet.getRow(i), templateSheet)) {
+            if (this.omitCells(sheet.getRow(i), templateSheet, sheet.getRow(0))) {
                 continue;
             }
             final List<String> valueList = new ArrayList<>();
@@ -43,19 +48,32 @@ public class XlsParser {
 
                 if (cell != null) {
                     cell.setCellType(CellType.STRING);
-
-                    valueList.add(this.convertToTableValue(cell, sheetColumn));
+                    if (cell.getStringCellValue() != "") {
+                        valueList.add(this.convertToTableValue(cell, sheetColumn));
+                    } else {
+                        valueList.add(DEFAULT_VALUE);
+                    }
                 } else {
                     valueList.add(DEFAULT_VALUE);
                 }
             }
 
             if (!valueList.stream().allMatch(val -> val.equals("''") || val.equals("null"))) {
+                final List<String> insertColNames = new ArrayList<>();
+                insertColNames.add(ID);
+                insertColNames.addAll(sheetColumns.stream().map(row -> row.colName).toList());
+
+                final List<String> insertValueList = new ArrayList<>();
+                insertValueList.add(String.valueOf(tableSequence));
+                insertValueList.addAll(valueList);
+
                 inserList.add(MessageFormat.format(
                         INSERT_FORMAT,
                         templateSheet.tableName,
-                        sheetColumns.stream().map(row -> row.colName).collect(Collectors.joining(",")),
-                        String.join(",", valueList)));
+                        String.join(",", insertColNames),
+                        String.join(",", insertValueList)));
+
+                tableSequence++;
             }
 
         }
@@ -65,14 +83,17 @@ public class XlsParser {
 
     }
 
-    private boolean containsIgnored(final Row row, final TemplateSheet templateSheet) {
+    private boolean omitCells(final Row row, final TemplateSheet templateSheet, final Row headerRow) {
         boolean validation = false;
         for (int i = 0; i < row.getLastCellNum(); i++) {
 
             final Cell cell = row.getCell(i);
-            if (cell != null) {
+            final Cell rowCell = headerRow.getCell(i);
+
+            if (cell != null && rowCell != null) {
                 cell.setCellType(CellType.STRING);
-                validation = templateSheet.rowIgnoringValues.contains(cell.getStringCellValue());
+                validation = this.containsIgnored(cell, templateSheet)
+                        || !this.requiredFieldNotEmpty(cell, templateSheet, rowCell.getStringCellValue());
                 if (validation) {
                     break;
                 }
@@ -80,6 +101,34 @@ public class XlsParser {
 
         }
         return validation;
+    }
+
+    private boolean containsIgnored(final Cell cell, final TemplateSheet templateSheet) {
+        return templateSheet.rowIgnoringValues.contains(cell.getStringCellValue());
+    }
+
+    private boolean containsIgnoredHeaders(final Cell cell, final TemplateSheet templateSheet, final String headerName) {
+        System.out.println("cell " + cell.getStringCellValue() + " header " + headerName);
+//        if (headerName.equals("PORTAL_NAME (OPL)")) {
+//            System.out.println("dasdsad");
+//            if (!Objects.isNull(templateSheet.rowIgnoringHeaders)
+//                    && templateSheet.rowIgnoringHeaders.contains(headerName) && cell.getStringCellValue() != "") {
+//                System.out.println("dasdsad2");
+//            }
+//        }
+
+        return !Objects.isNull(templateSheet.rowIgnoringHeaders)
+            && templateSheet.rowIgnoringHeaders.contains(headerName) && cell.getStringCellValue() != "";
+    }
+
+    private boolean requiredFieldNotEmpty(final Cell cell, final TemplateSheet templateSheet, final String headerName) {
+        final Optional<SheetColumn> sheetColumn = templateSheet.columns.stream()
+                .filter(col -> col.fileColName.equals(headerName))
+                .findFirst();
+        if (!sheetColumn.isPresent()) {
+            return true;
+        }
+        return sheetColumn.get().required ? cell.getStringCellValue() != "" : true;
     }
 
     private String convertToTableValue(final Cell cell, final SheetColumn sheetColumn) {
@@ -117,4 +166,5 @@ public class XlsParser {
             throw new WrongConfigurationException("Table configuration not compatible with file: " + templateSheet.filePath);
         }
     }
+
 }

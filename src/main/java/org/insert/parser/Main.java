@@ -1,5 +1,6 @@
 package org.insert.parser;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.insert.parser.sheets.TemplateSheet;
 import org.insert.parser.xlsParser.XlsParser;
@@ -14,6 +15,7 @@ public class Main {
     public static void main(String[] args) {
         final long startTime = System.currentTimeMillis();
         final ObjectMapper om = new ObjectMapper();
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             File folder = new File("./conf");
             if (!folder.exists()) {

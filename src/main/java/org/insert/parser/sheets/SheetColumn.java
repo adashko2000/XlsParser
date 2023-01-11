@@ -7,4 +7,6 @@ public class SheetColumn {
     public String fileColName;
 
     public String type;
+
+    public boolean required;
 }
