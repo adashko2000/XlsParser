@@ -12,8 +12,6 @@ import org.insert.parser.sheets.TemplateSheet;
 import java.io.FileInputStream;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class XlsParser {
 
@@ -88,12 +86,12 @@ public class XlsParser {
         for (int i = 0; i < row.getLastCellNum(); i++) {
 
             final Cell cell = row.getCell(i);
-            final Cell rowCell = headerRow.getCell(i);
+            final Cell headerCell = headerRow.getCell(i);
 
-            if (cell != null && rowCell != null) {
+            if (cell != null && headerCell != null) {
                 cell.setCellType(CellType.STRING);
-                validation = this.containsIgnored(cell, templateSheet)
-                        || !this.requiredFieldNotEmpty(cell, templateSheet, rowCell.getStringCellValue());
+                validation = this.containsIgnored(cell, templateSheet, headerCell.getStringCellValue())
+                        || !this.requiredFieldNotEmpty(cell, templateSheet, headerCell.getStringCellValue());
                 if (validation) {
                     break;
                 }
@@ -103,22 +101,12 @@ public class XlsParser {
         return validation;
     }
 
-    private boolean containsIgnored(final Cell cell, final TemplateSheet templateSheet) {
-        return templateSheet.rowIgnoringValues.contains(cell.getStringCellValue());
-    }
+    private boolean containsIgnored(final Cell cell, final TemplateSheet templateSheet, final String headerName) {
+        final Optional<SheetColumn> sheetColumn = templateSheet.columns.stream()
+                .filter(col -> col.fileColName.equals(headerName))
+                .findFirst();
 
-    private boolean containsIgnoredHeaders(final Cell cell, final TemplateSheet templateSheet, final String headerName) {
-        System.out.println("cell " + cell.getStringCellValue() + " header " + headerName);
-//        if (headerName.equals("PORTAL_NAME (OPL)")) {
-//            System.out.println("dasdsad");
-//            if (!Objects.isNull(templateSheet.rowIgnoringHeaders)
-//                    && templateSheet.rowIgnoringHeaders.contains(headerName) && cell.getStringCellValue() != "") {
-//                System.out.println("dasdsad2");
-//            }
-//        }
-
-        return !Objects.isNull(templateSheet.rowIgnoringHeaders)
-            && templateSheet.rowIgnoringHeaders.contains(headerName) && cell.getStringCellValue() != "";
+        return sheetColumn.isPresent() && templateSheet.rowIgnoringValues.contains(cell.getStringCellValue());
     }
 
     private boolean requiredFieldNotEmpty(final Cell cell, final TemplateSheet templateSheet, final String headerName) {
